@@ -3,28 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>محاكاة نوتش iPhone 13 Pro</title>
+<title>محاكاة نوتش iPhone 13 Pro (دقيقة)</title>
 
 <!-- تشغيل كـ Web App على iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Notch Demo">
+<meta name="apple-mobile-web-app-title" content="Notch 13 Pro">
 <meta name="theme-color" content="#000000">
 
 <style>
   :root{
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --notch-w: clamp(230px, 56vw, 280px); /* عرض قريب من نوتش 13 برو */
-    --notch-h: 34px;                      /* ارتفاع النوتش */
-    --glass: rgba(0,0,0,.88);
+
+    /* القيم الافتراضية (يتم تعديلها تلقائيًا بالـ media queries) */
+    --notch-w: 210px; /* 13 Pro */
+    --notch-h: 34px;
+    --radius-b: 14px;
+
+    --glass: rgba(0,0,0,.92);
     --border: rgba(255,255,255,.06);
     --accent: #60a5ff;
     --ok: #25D366;
     --warn: #ff7a7a;
+    --txt: #fff;
   }
+  /* 13 Pro Max (428pt) */
+  @media (min-width: 420px) and (max-width: 440px) {
+    :root{ --notch-w: 230px; --notch-h: 34px; --radius-b: 14px; }
+  }
+
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;margin:0;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+  html,body{height:100%;margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto}
   .stage{position:fixed;inset:0;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);overflow:hidden}
   .bg{
     position:absolute;inset:0;pointer-events:none;
@@ -34,43 +44,37 @@
       #000;
   }
 
-  /* --- النوتش: مستطيل بزوايا سفلية دائرية، ملتصق بحافة الأعلى --- */
+  /* النوتش: ملتصق بالأعلى، زوايا سفلية مستديرة فقط */
   .notch{
-    position:fixed; z-index:5;
-    top: 0; left:50%; transform:translateX(-50%);
+    position:fixed; z-index:5; top:0; left:50%; transform:translateX(-50%);
     width: var(--notch-w); height: calc(var(--safe-top) + var(--notch-h));
-    /* نعمل الحافة العليا شفافة ونجعل الشكل الحقيقي يبدأ أسفل الـ safe-top */
-    pointer-events:auto;
   }
-  .notch .shape{
-    position:absolute;
-    top: var(--safe-top); left:50%; transform:translateX(-50%);
-    width: var(--notch-w); height: var(--notch-h);
+  .shape{
+    position:absolute; left:50%; transform:translateX(-50%);
+    top: var(--safe-top); width: var(--notch-w); height: var(--notch-h);
     background: var(--glass);
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    border: 1px solid var(--border);
-    border-top: none; /* لا نريد حافة في الأعلى لأنه ملتصق */
-    box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 18px rgba(96,165,255,.14);
+    border-bottom-left-radius: var(--radius-b);
+    border-bottom-right-radius: var(--radius-b);
+    border: 1px solid var(--border); border-top:none;
+    box-shadow: 0 10px 26px rgba(0,0,0,.5), 0 0 16px rgba(96,165,255,.12);
     overflow:hidden;
-    transition: width .28s cubic-bezier(.2,.9,.2,1), height .28s cubic-bezier(.2,.9,.2,1);
+    transition: width .28s cubic-bezier(.2,.9,.2,1),
+               height .28s cubic-bezier(.2,.9,.2,1),
+               border-radius .28s ease;
   }
 
-  /* توسعة النوتش لعرض بطاقات/نص */
-  .notch.expand .shape{
-    width: clamp(280px, 90vw, 560px);
-    height: calc(var(--notch-h) + 110px);
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
+  /* توسعة لعرض المحتوى */
+  .expand .shape{
+    width: clamp(calc(var(--notch-w) + 40px), 90vw, 560px);
+    height: calc(var(--notch-h) + 118px);
   }
 
-  /* محتوى شريط النوتش (سطر علوي) */
+  /* الشريط العلوي داخل النوتش */
   .bar{
-    position:absolute; left:0; right:0;
-    top: calc(var(--safe-top));
-    height: var(--notch-h);
-    display:flex; align-items:center; gap:10px;
-    padding: 6px 12px; font-size:13px; font-weight:700;
+    position:absolute; left:50%; transform:translateX(-50%);
+    top: calc(var(--safe-top)); width: var(--notch-w); height: var(--notch-h);
+    display:flex; align-items:center; gap:10px; padding:6px 12px; font-size:13px; font-weight:700;
+    pointer-events:none;
   }
   .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.6s ease-in-out infinite}
   @keyframes pulse{0%,100%{transform:scale(.9);opacity:.9}50%{transform:scale(1.15);opacity:1}}
@@ -84,15 +88,17 @@
   .barv:nth-child(5){animation:updown 1s ease-in-out infinite .6s}
   .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* صينية المحتوى عند التوسعة */
+  /* صينية المحتوى */
   .tray{
-    position:absolute; left:8px; right:8px;
+    position:absolute; left:50%; transform:translateX(-50%);
     top: calc(var(--safe-top) + var(--notch-h) + 6px);
+    width: min(540px, 90vw);
     display:grid; gap:8px; grid-template-columns: 1fr;
-    opacity:0; transform:translateY(-6px);
-    transition: opacity .18s ease, transform .24s ease;
+    opacity:0; translate: 0 -6px;
+    transition: opacity .18s ease, translate .24s ease;
+    pointer-events:none;
   }
-  .notch.expand .tray{opacity:1; transform:translateY(0)}
+  .expand .tray{opacity:1; translate:0 0; pointer-events:auto}
 
   .card{
     background: rgba(255,255,255,.04);
@@ -104,7 +110,6 @@
   .wa{background:var(--ok)}
   .who{font-weight:700}
   .text{opacity:.92}
-
   .pill{
     display:inline-flex; gap:8px; align-items:center;
     background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
@@ -113,7 +118,7 @@
   .pill.ok{box-shadow: 0 8px 24px rgba(37,211,102,.25)}
   .pill.warn{box-shadow: 0 8px 24px rgba(255,122,122,.25)}
 
-  /* لوحة تحكم تحت */
+  /* لوحة التحكم */
   .panel{
     position:fixed; left:50%; bottom: calc(14px + var(--safe-bottom));
     transform:translateX(-50%);
@@ -124,11 +129,21 @@
     background:rgba(255,255,255,.06); color:#fff; font-weight:700; font-size:14px;
   }
 
+  /* أدوات الضبط الدقيقة */
+  .tuner{
+    position:fixed; right:10px; top: calc(var(--safe-top) + 8px);
+    display:flex; gap:6px; z-index:10;
+  }
+  .tuner .s{
+    padding:6px 10px; border-radius:10px; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12); color:#fff; font-weight:700; font-size:12px;
+  }
+
   .hint{
     position:fixed; left:50%; transform:translateX(-50%);
     top: calc(var(--safe-top) + 52px); font-size:12px; opacity:.85;
     background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-    padding:6px 10px; border-radius:10px; backdrop-filter: blur(6px); z-index:10;
+    padding:6px 10px; border-radius:10px; backdrop-filter: blur(6px); z-index:8;
   }
 </style>
 </head>
@@ -137,8 +152,8 @@
     <div class="bg"></div>
 
     <!-- النوتش -->
-    <div class="notch" id="notch" title="اضغط للتوسيع/التصغير">
-      <div class="shape"></div>
+    <div id="notch" class="notch">
+      <div class="shape" id="shape"></div>
 
       <!-- شريط علوي داخل النوتش -->
       <div class="bar">
@@ -150,12 +165,12 @@
           <div class="barv" style="height:14px"></div>
           <div class="barv" style="height:7px"></div>
         </div>
-        <div class="title" id="title">نوتش iPhone 13 Pro — جاهز</div>
+        <div class="title" id="title">نوتش iPhone 13 Pro — مطابق</div>
       </div>
 
-      <!-- صينية المحتوى (تظهر عند التوسعة) -->
+      <!-- صينية المحتوى -->
       <div class="tray" id="tray">
-        <!-- بطاقة واتساب -->
+        <!-- إشعار واتساب -->
         <div class="card" id="waCard">
           <div class="row">
             <div class="appicon wa">🟢</div>
@@ -185,78 +200,72 @@
       <button class="btn" onclick="toggleMode()">تبديل: صامت/عام</button>
     </div>
 
+    <!-- أزرار ضبط دقيقة -->
+    <div class="tuner" aria-label="ضبط أبعاد النوتش">
+      <button class="s" onclick="setNotch('w',-2)">W−</button>
+      <button class="s" onclick="setNotch('w',+2)">W+</button>
+      <button class="s" onclick="setNotch('h',-1)">H−</button>
+      <button class="s" onclick="setNotch('h',+1)">H+</button>
+      <button class="s" onclick="resetNotch()">Reset</button>
+    </div>
+
     <div class="hint">أضِف إلى الشاشة الرئيسية من Safari → Share → Add to Home Screen.</div>
   </div>
 
 <script>
+  const root = document.documentElement;
   const notch = document.getElementById('notch');
-  const tray  = document.getElementById('tray');
+  const shape = document.getElementById('shape');
 
-  // توسيع/تصغير بالنقر
-  notch.addEventListener('click', (e)=>{
-    // نتجاهل النقر على الأزرار الداخلية لو توسعت
-    if(e.target.closest('.panel,.btn')) return;
+  // توسيع/تصغير
+  function toggleExpand(force){
+    const willExpand = (typeof force==='boolean') ? force : !notch.classList.contains('expand');
+    notch.classList.toggle('expand', willExpand);
+    document.getElementById('title').textContent = willExpand
+      ? 'إشعارات تجريبية — اسحب للأعلى لإخفاء'
+      : 'نوتش iPhone 13 Pro — مطابق';
+    puff();
+  }
+  notch.addEventListener('click', e=>{
+    if(e.target.closest('.tuner,.panel,.btn')) return;
     toggleExpand();
   });
 
-  function toggleExpand(force){
-    const willExpand = force ?? !notch.classList.contains('expand');
-    notch.classList.toggle('expand', willExpand);
-    // عنوان ديناميكي بسيط
-    document.getElementById('title').textContent = willExpand
-      ? 'إشعارات تجريبية — اسحب للأعلى لإخفاء'
-      : 'نوتش iPhone 13 Pro — جاهز';
-    // نفخة بسيطة
-    puff();
-  }
-
   // إشعار واتساب (محاكاة)
   function triggerWA(name="صديقك", text="وينك؟ محتاجك الآن."){
-    document.getElementById('waFrom').textContent = name;
-    document.getElementById('waText').textContent = text;
-    // افتح النوتش لو كان مغلق
+    waFrom.textContent = name; waText.textContent = text;
     if(!notch.classList.contains('expand')) toggleExpand(true);
-    // وميض للبطاقة
     flash(document.getElementById('waCard'));
   }
-
   function customWA(){
-    const n = prompt("اسم المرسل:", "أحمد الواتس");
-    if(n===null) return;
-    const t = prompt("نص الرسالة:", "تمام؟");
-    if(t===null) return;
+    const n = prompt("اسم المرسل:", "أحمد الواتس"); if(n===null) return;
+    const t = prompt("نص الرسالة:", "تمام؟"); if(t===null) return;
     triggerWA(n || "بدون اسم", t || "…");
   }
 
   // تبديل صامت/عام
-  let silent = false;
+  let silent=false;
   function toggleMode(){
-    silent = !silent;
-    const pill = document.getElementById('modePill');
-    const txt  = document.getElementById('modeText');
-    const bell = document.getElementById('bell');
-    txt.textContent = "النمط: " + (silent ? "صامت" : "عام");
+    silent=!silent;
+    modeText.textContent = "النمط: " + (silent ? "صامت" : "عام");
     bell.textContent = silent ? "🔕" : "🔔";
-    pill.classList.toggle('ok', !silent);
-    pill.classList.toggle('warn', silent);
+    modePill.classList.toggle('ok', !silent);
+    modePill.classList.toggle('warn', silent);
     if(!notch.classList.contains('expand')) toggleExpand(true);
-    flash(pill.closest('.card'));
+    flash(modePill.closest('.card'));
   }
 
-  // نفخة للنوتش
+  // نفخة خفيفة
   function puff(){
-    const shape = notch.querySelector('.shape');
     shape.animate(
       [
-        { transform: 'translateX(-50%) scaleY(1)' },
-        { transform: 'translateX(-50%) scaleY(1.05)' },
-        { transform: 'translateX(-50%) scaleY(1)' }
+        { transform:'translateX(-50%) scaleY(1)' },
+        { transform:'translateX(-50%) scaleY(1.05)' },
+        { transform:'translateX(-50%) scaleY(1)' }
       ],
-      { duration: 260, easing: 'cubic-bezier(.2,.9,.2,1)' }
+      { duration:260, easing:'cubic-bezier(.2,.9,.2,1)' }
     );
   }
-
-  // وميض لأي عنصر بطاقة
   function flash(el){
     el.animate(
       [
@@ -264,11 +273,11 @@
         { boxShadow:'0 8px 28px rgba(96,165,255,.45)' },
         { boxShadow:'0 8px 20px rgba(0,0,0,.35)' }
       ],
-      { duration: 420, easing: 'ease-in-out' }
+      { duration:420, easing:'ease-in-out' }
     );
   }
 
-  // سحب للأعلى لإغلاق (إيماءة بسيطة)
+  // سحب للأعلى لإغلاق
   let sy=null;
   notch.addEventListener('touchstart', e=>{ sy = e.touches[0].clientY; }, {passive:true});
   notch.addEventListener('touchmove', e=>{
@@ -278,7 +287,32 @@
   }, {passive:true});
   notch.addEventListener('touchend', ()=>{ sy=null; }, {passive:true});
 
-  // تحسين اللمس على iOS
+  // ------- الضبط الدقيق -------
+  let baseW = parseInt(getComputedStyle(root).getPropertyValue('--notch-w')) || 210;
+  let baseH = parseInt(getComputedStyle(root).getPropertyValue('--notch-h')) || 34;
+
+  function applyNotch(w,h){
+    root.style.setProperty('--notch-w', w + 'px');
+    root.style.setProperty('--notch-h', h + 'px');
+    // تحديث عرض الشريط العلوي ليطابق الشكل
+    document.querySelector('.bar').style.width = w + 'px';
+  }
+  function setNotch(axis, delta){
+    if(axis==='w'){ baseW = Math.max(150, Math.min(320, baseW + delta)); }
+    if(axis==='h'){ baseH = Math.max(24,  Math.min(60,  baseH + delta)); }
+    applyNotch(baseW, baseH);
+    puff();
+  }
+  function resetNotch(){
+    // استعادة القيم حسب الجهاز
+    const isMax = window.innerWidth >= 420 && window.innerWidth <= 440;
+    baseW = isMax ? 230 : 210; baseH = 34;
+    applyNotch(baseW, baseH); puff();
+  }
+  // تهيئة أولية
+  applyNotch(baseW, baseH);
+
+  // تحسين اللمس
   document.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
 </body>
