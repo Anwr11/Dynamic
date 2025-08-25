@@ -1,111 +1,123 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Dynamic Island Mock — Demo</title>
-<style>
-  :root{
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --island-w: clamp(180px, 46vw, 280px);
-    --island-h: 40px;
-    --bg: #0b0b0c;
-    --glass: rgba(14,14,18,.82);
-    --border: rgba(255,255,255,.08);
-    --txt: #fff;
-    --accent: #60a5ff;
-    --wa: #25D366;
-    --danger: #ff6060;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto}
-  .stage{position:fixed;inset:0;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);display:flex;align-items:center;justify-content:center;overflow:hidden}
-  /* خلفية بسيطة */
-  .grid{
-    position:absolute;inset:0;pointer-events:none;
-    background:
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>محاكاة Dynamic Island — إشعارات تجريبية</title>
+
+  <!-- تشغيل كـ Web App على iOS بدون شريط المتصفح -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dynamic Demo">
+  <meta name="theme-color" content="#000000">
+
+  <!-- أيقونة افتراضية (اختياري). تقدر تغيّر data URL بصورة شعارك -->
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAQAAACxvWnPAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABM0lEQVR42u3SwQ2DMBQF0VYVb7WMBzJbqgA2mJwQ2QYw8m0qf0P3x7rGg4y1nQp7Qf8qC5/8rX2Q4kAgAAAAAAAAAAAAAA4JcJ6u7U3S9Ew9m6q1g8eOqU2P8kQh8qYv2iYwG2z1xI0bQf2lq7q8KkI6P7p2P0L4Jr9x0x1t0b0x4gWkqkKkC1qg1zqQ1y2u0Jd7J0J4h3w1p0uZbqf6m8b7Y6m6dY8mGv1yC3qJ6M4i6Gq2sQyR7a2b1Qf3oJx7l3X9qkfdq2+3D4wHq3hV1q9uJw2Y1s3xV5Yy0jQ3m5LJrS7k0c8h0b9g3sQbHk2M8m1D7l0H+2Qf7kYHcG0P0AAAAAAAAAAAAAAAD8Cq6l3vCw6m3o7w8r8w8kZc5Jbq7AAAAAElFTkSuQmCC">
+
+  <style>
+    :root{
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --island-w: clamp(180px, 46vw, 280px);
+      --island-h: 40px;
+      --glass: rgba(14,14,18,.82);
+      --border: rgba(255,255,255,.08);
+      --txt: #fff;
+      --accent: #60a5ff;
+      --wa: #25D366;
+      --danger: #ff6060;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    .stage{position:fixed;inset:0;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .grid{position:absolute;inset:0;pointer-events:none;background:
       radial-gradient(1200px 600px at 50% -20%, rgba(96,165,255,.15), transparent 60%),
       radial-gradient(800px 400px at 30% 120%, rgba(37,211,102,.14), transparent 60%),
-      #000;
-  }
+      #000;}
 
-  /* الجزيرة */
-  .island{
-    position:fixed; z-index:5;
-    top: calc(var(--safe-top) + 8px); left:50%; transform:translateX(-50%);
-    width: var(--island-w); height: var(--island-h);
-    border-radius: 20px; background: var(--glass);
-    border:1px solid var(--border);
-    box-shadow: 0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.18);
-    backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
-    overflow: hidden;
-  }
-  .island .row{position:absolute;inset:0;display:flex;align-items:center;gap:10px;padding:8px 12px}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{transform:scale(.9);opacity:.9}50%{transform:scale(1.15);opacity:1}}
+    /* الجزيرة */
+    .island{
+      position:fixed; z-index:5;
+      top: calc(var(--safe-top) + 8px); left:50%; transform:translateX(-50%);
+      width: var(--island-w); height: var(--island-h);
+      border-radius: 20px; background: var(--glass);
+      border:1px solid var(--border);
+      box-shadow: 0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.18);
+      backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+      overflow: hidden;
+    }
+    .island .row{position:absolute;inset:0;display:flex;align-items:center;gap:10px;padding:8px 12px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.6s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(.9);opacity:.9}50%{transform:scale(1.15);opacity:1}}
 
-  /* بطاقات منبثقة من الجزيرة */
-  .card{
-    position:fixed; z-index:6; left:50%; transform:translateX(-50%);
-    top: calc(var(--safe-top) + 8px + var(--island-h) + 8px);
-    width: clamp(240px, 80vw, 560px);
-    background: var(--glass); border:1px solid var(--border);
-    border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,.55);
-    opacity:0; pointer-events:none; translate: 0 -12px; 
-    transition: opacity .18s ease, translate .24s ease;
-    overflow:hidden;
-  }
-  .card.show{opacity:1; translate:0 0; pointer-events:auto}
-  .card .hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
-  .appicon{width:18px;height:18px;border-radius:4px;background:#1d1d22;display:grid;place-items:center;font-size:12px}
-  .appicon.wa{background:var(--wa)}
-  .appname{font-weight:700;font-size:13px}
-  .close{margin-inline-start:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#fff;font-size:12px;padding:4px 8px}
-  .msg{padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
-  .who{font-weight:700}
-  .text{opacity:.92}
-  .actions{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.06)}
-  .btn{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:600}
-  .btn.primary{background:rgba(96,165,255,.18)}
-  .btn.danger{background:rgba(255,96,96,.18)}
-  .tiny{font-size:12px;opacity:.85}
+    /* البطاقة المنبثقة */
+    .card{
+      position:fixed; z-index:6; left:50%; transform:translateX(-50%);
+      top: calc(var(--safe-top) + 8px + var(--island-h) + 8px);
+      width: clamp(240px, 80vw, 560px);
+      background: var(--glass); border:1px solid var(--border);
+      border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,.55);
+      opacity:0; pointer-events:none; translate: 0 -12px; 
+      transition: opacity .18s ease, translate .24s ease;
+      overflow:hidden;
+    }
+    .card.show{opacity:1; translate:0 0; pointer-events:auto}
+    .card .hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .appicon{width:18px;height:18px;border-radius:4px;background:#1d1d22;display:grid;place-items:center;font-size:12px}
+    .appicon.wa{background:var(--wa)}
+    .appname{font-weight:700;font-size:13px}
+    .close{margin-inline-start:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#fff;font-size:12px;padding:4px 8px}
+    .msg{padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+    .who{font-weight:700}
+    .text{opacity:.92}
+    .actions{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.06)}
+    .btn{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:600}
+    .btn.primary{background:rgba(96,165,255,.18)}
+    .btn.danger{background:rgba(255,96,96,.18)}
+    .tiny{font-size:12px;opacity:.85}
 
-  /* شريط حالة صغير يبدّل صامت/عام */
-  .pill{
-    position:fixed; z-index:7; left:50%; transform:translateX(-50%);
-    top: calc(var(--safe-top) + 8px + var(--island-h)/2 - 14px);
-    translate: 0 -60px; opacity:0; pointer-events:none;
-    background: var(--glass); border:1px solid var(--border); color:#fff;
-    padding:6px 10px; border-radius:999px; display:flex; gap:8px; align-items:center;
-    box-shadow: 0 10px 30px rgba(0,0,0,.4);
-    transition: opacity .18s ease, translate .28s cubic-bezier(.2,.8,.2,1);
-  }
-  .pill.show{opacity:1; translate:0 0}
-  .bell{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08)}
-  .bell svg{width:12px;height:12px;display:block}
+    /* حبة الحالة (صامت/عام) */
+    .pill{
+      position:fixed; z-index:7; left:50%; transform:translateX(-50%);
+      top: calc(var(--safe-top) + 8px + var(--island-h)/2 - 14px);
+      translate: 0 -60px; opacity:0; pointer-events:none;
+      background: var(--glass); border:1px solid var(--border); color:#fff;
+      padding:6px 10px; border-radius:999px; display:flex; gap:8px; align-items:center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.4);
+      transition: opacity .18s ease, translate .28s cubic-bezier(.2,.8,.2,1);
+    }
+    .pill.show{opacity:1; translate:0 0}
+    .bell{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08)}
+    .bell svg{width:12px;height:12px;display:block}
 
-  /* لوحة تحكم تحت */
-  .panel{
-    position:fixed; left:50%; bottom: calc(14px + var(--safe-bottom));
-    transform:translateX(-50%); display:flex; gap:10px; flex-wrap:wrap;
-    justify-content:center; z-index:8;
-  }
-  .panel .btn{font-size:14px}
+    /* لوحة التحكم تحت */
+    .panel{
+      position:fixed; left:50%; bottom: calc(14px + var(--safe-bottom));
+      transform:translateX(-50%); display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:center; z-index:8;
+    }
+    .panel .btn{font-size:14px}
 
-  /* محتوى الجزيرة الافتراضي */
-  .title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .meter{display:flex;align-items:flex-end;gap:3px;height:14px}
-  .bar{width:3px;background:#8cf;border-radius:2px;opacity:.9}
+    /* محتوى الجزيرة الافتراضي */
+    .title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meter{display:flex;align-items:flex-end;gap:3px;height:14px}
+    .bar{width:3px;background:#8cf;border-radius:2px;opacity:.9}
+    @keyframes updown{from{height:6px}50%{height:14px}to{height:8px}}
+    .bar:nth-child(1){animation:updown 1s ease-in-out infinite .0s}
+    .bar:nth-child(2){animation:updown 1s ease-in-out infinite .15s}
+    .bar:nth-child(3){animation:updown 1s ease-in-out infinite .3s}
+    .bar:nth-child(4){animation:updown 1s ease-in-out infinite .45s}
+    .bar:nth-child(5){animation:updown 1s ease-in-out infinite .6s}
 
-  /* أنيميشن bars */
-  @keyframes updown{from{height:6px}50%{height:14px}to{height:8px}}
-  .bar:nth-child(1){animation:updown 1s ease-in-out infinite .0s}
-  .bar:nth-child(2){animation:updown 1s ease-in-out infinite .15s}
-  .bar:nth-child(3){animation:updown 1s ease-in-out infinite .3s}
-  .bar:nth-child(4){animation:updown 1s ease-in-out infinite .45s}
-  .bar:nth-child(5){animation:updown 1s ease-in-out infinite .6s}
-</style>
+    /* تعليمات سريعة على الشاشة */
+    .hint{
+      position:fixed; z-index:9; left:50%; transform:translateX(-50%);
+      top: calc(var(--safe-top) + 56px);
+      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+      color:#fff; padding:8px 12px; border-radius:12px; font-size:12px;
+      backdrop-filter: blur(8px);
+    }
+  </style>
 </head>
 <body>
   <div class="stage">
@@ -142,15 +154,16 @@
       <div class="actions">
         <button class="btn primary" onclick="alert('رد سريع (محاكاة)')">رد سريع</button>
         <button class="btn" data-close="#waCard">تمييز كمقروء</button>
-        <button class="btn danger" data-close="#waCard">رفض</button>
+        <button class="btn danger" data-close="#waCard">إغلاق</button>
       </div>
     </div>
 
-    <!-- حبة الحالة (صامت/عام) -->
+    <!-- حالة صامت/عام -->
     <div class="pill" id="modePill">
       <span class="bell" id="bellIcon">
-        <!-- جرس -->
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/>
+        </svg>
       </span>
       <span id="modeText">النمط: عام</span>
     </div>
@@ -161,6 +174,8 @@
       <button class="btn" onclick="toggleMode()">تبديل: صامت/عام</button>
       <button class="btn" onclick="customWA()">رسالة مخصصة…</button>
     </div>
+
+    <div class="hint">أضِف إلى الشاشة الرئيسية من Safari → Share → Add to Home Screen، ثم افتح من الأيقونة.</div>
   </div>
 
 <script>
@@ -178,9 +193,7 @@
     document.getElementById('waText').textContent = text;
     const card = document.getElementById('waCard');
     card.classList.add('show');
-    // أنيميشن "نفخة" في الجزيرة
     puffIsland();
-    // إخفاء تلقائي بعد 6 ثوانٍ (تقدر تغيّرها)
     clearTimeout(triggerWA._t);
     triggerWA._t = setTimeout(()=>card.classList.remove('show'), 6000);
   }
@@ -194,7 +207,7 @@
     triggerWA(n || "بدون اسم", t || "…");
   }
 
-  // تبديل صامت/عام
+  // تبديل صامت/عام (محاكاة)
   let isSilent = false;
   function toggleMode(){
     isSilent = !isSilent;
@@ -202,35 +215,29 @@
     const txt = document.getElementById('modeText');
     const bell = document.getElementById('bellIcon');
     txt.textContent = "النمط: " + (isSilent ? "صامت" : "عام");
-    // تبديل أيقونة (رسم بسيط X فوق الجرس عند الصامت)
     bell.innerHTML = isSilent
       ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/></svg>`
       : `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/></svg>`;
-    // خط شطب بسيط عند الصامت
-    pill.style.setProperty('--strike', isSilent ? 1 : 0);
-    if(isSilent){
-      pill.style.boxShadow = "0 12px 36px rgba(255,96,96,.25)";
-    }else{
-      pill.style.boxShadow = "0 12px 36px rgba(96,165,255,.25)";
-    }
+    pill.style.boxShadow = isSilent
+      ? "0 12px 36px rgba(255,96,96,.25)"
+      : "0 12px 36px rgba(96,165,255,.25)";
     pill.classList.add('show');
     puffIsland(isSilent ? 'danger' : 'normal');
     clearTimeout(toggleMode._t);
     toggleMode._t = setTimeout(()=>pill.classList.remove('show'), 2500);
   }
 
-  // نفخة مرنة للجزيرة (scale+glow بسيط)
+  // نفخة مرنة للجزيرة
   function puffIsland(mode='normal'){
     const el = document.getElementById('island');
     el.animate(
       [
-        { transform: 'translateX(-50%) scale(1)', boxShadow: el.style.boxShadow },
+        { transform: 'translateX(-50%) scale(1)' },
         { transform: 'translateX(-50%) scale(1.06)' },
         { transform: 'translateX(-50%) scale(1)' }
       ],
       { duration: 320, easing: 'cubic-bezier(.2,.9,.2,1)' }
     );
-    // توهج حسب الحالة
     el.style.boxShadow = mode==='danger'
       ? "0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(255,96,96,.28)"
       : "0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.22)";
@@ -240,7 +247,7 @@
     }, 500);
   }
 
-  // تحسين اللمس
+  // تحسين اللمس على iOS
   document.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
 </body>
