@@ -1,251 +1,282 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>محاكاة Dynamic Island — إشعارات تجريبية</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>محاكاة نوتش iPhone 13 Pro</title>
 
-  <!-- تشغيل كـ Web App على iOS بدون شريط المتصفح -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Dynamic Demo">
-  <meta name="theme-color" content="#000000">
+<!-- تشغيل كـ Web App على iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Notch Demo">
+<meta name="theme-color" content="#000000">
 
-  <!-- أيقونة افتراضية (اختياري). تقدر تغيّر data URL بصورة شعارك -->
-  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAQAAACxvWnPAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABM0lEQVR42u3SwQ2DMBQF0VYVb7WMBzJbqgA2mJwQ2QYw8m0qf0P3x7rGg4y1nQp7Qf8qC5/8rX2Q4kAgAAAAAAAAAAAAAA4JcJ6u7U3S9Ew9m6q1g8eOqU2P8kQh8qYv2iYwG2z1xI0bQf2lq7q8KkI6P7p2P0L4Jr9x0x1t0b0x4gWkqkKkC1qg1zqQ1y2u0Jd7J0J4h3w1p0uZbqf6m8b7Y6m6dY8mGv1yC3qJ6M4i6Gq2sQyR7a2b1Qf3oJx7l3X9qkfdq2+3D4wHq3hV1q9uJw2Y1s3xV5Yy0jQ3m5LJrS7k0c8h0b9g3sQbHk2M8m1D7l0H+2Qf7kYHcG0P0AAAAAAAAAAAAAAAD8Cq6l3vCw6m3o7w8r8w8kZc5Jbq7AAAAAElFTkSuQmCC">
+<style>
+  :root{
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --notch-w: clamp(230px, 56vw, 280px); /* عرض قريب من نوتش 13 برو */
+    --notch-h: 34px;                      /* ارتفاع النوتش */
+    --glass: rgba(0,0,0,.88);
+    --border: rgba(255,255,255,.06);
+    --accent: #60a5ff;
+    --ok: #25D366;
+    --warn: #ff7a7a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+  .stage{position:fixed;inset:0;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);overflow:hidden}
+  .bg{
+    position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(1200px 600px at 50% -20%, rgba(96,165,255,.12), transparent 60%),
+      radial-gradient(800px 400px at 30% 120%, rgba(37,211,102,.10), transparent 60%),
+      #000;
+  }
 
-  <style>
-    :root{
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --island-w: clamp(180px, 46vw, 280px);
-      --island-h: 40px;
-      --glass: rgba(14,14,18,.82);
-      --border: rgba(255,255,255,.08);
-      --txt: #fff;
-      --accent: #60a5ff;
-      --wa: #25D366;
-      --danger: #ff6060;
-    }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%;margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto}
-    .stage{position:fixed;inset:0;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .grid{position:absolute;inset:0;pointer-events:none;background:
-      radial-gradient(1200px 600px at 50% -20%, rgba(96,165,255,.15), transparent 60%),
-      radial-gradient(800px 400px at 30% 120%, rgba(37,211,102,.14), transparent 60%),
-      #000;}
+  /* --- النوتش: مستطيل بزوايا سفلية دائرية، ملتصق بحافة الأعلى --- */
+  .notch{
+    position:fixed; z-index:5;
+    top: 0; left:50%; transform:translateX(-50%);
+    width: var(--notch-w); height: calc(var(--safe-top) + var(--notch-h));
+    /* نعمل الحافة العليا شفافة ونجعل الشكل الحقيقي يبدأ أسفل الـ safe-top */
+    pointer-events:auto;
+  }
+  .notch .shape{
+    position:absolute;
+    top: var(--safe-top); left:50%; transform:translateX(-50%);
+    width: var(--notch-w); height: var(--notch-h);
+    background: var(--glass);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    border: 1px solid var(--border);
+    border-top: none; /* لا نريد حافة في الأعلى لأنه ملتصق */
+    box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 18px rgba(96,165,255,.14);
+    overflow:hidden;
+    transition: width .28s cubic-bezier(.2,.9,.2,1), height .28s cubic-bezier(.2,.9,.2,1);
+  }
 
-    /* الجزيرة */
-    .island{
-      position:fixed; z-index:5;
-      top: calc(var(--safe-top) + 8px); left:50%; transform:translateX(-50%);
-      width: var(--island-w); height: var(--island-h);
-      border-radius: 20px; background: var(--glass);
-      border:1px solid var(--border);
-      box-shadow: 0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.18);
-      backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
-      overflow: hidden;
-    }
-    .island .row{position:absolute;inset:0;display:flex;align-items:center;gap:10px;padding:8px 12px}
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.6s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(.9);opacity:.9}50%{transform:scale(1.15);opacity:1}}
+  /* توسعة النوتش لعرض بطاقات/نص */
+  .notch.expand .shape{
+    width: clamp(280px, 90vw, 560px);
+    height: calc(var(--notch-h) + 110px);
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
 
-    /* البطاقة المنبثقة */
-    .card{
-      position:fixed; z-index:6; left:50%; transform:translateX(-50%);
-      top: calc(var(--safe-top) + 8px + var(--island-h) + 8px);
-      width: clamp(240px, 80vw, 560px);
-      background: var(--glass); border:1px solid var(--border);
-      border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,.55);
-      opacity:0; pointer-events:none; translate: 0 -12px; 
-      transition: opacity .18s ease, translate .24s ease;
-      overflow:hidden;
-    }
-    .card.show{opacity:1; translate:0 0; pointer-events:auto}
-    .card .hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .appicon{width:18px;height:18px;border-radius:4px;background:#1d1d22;display:grid;place-items:center;font-size:12px}
-    .appicon.wa{background:var(--wa)}
-    .appname{font-weight:700;font-size:13px}
-    .close{margin-inline-start:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#fff;font-size:12px;padding:4px 8px}
-    .msg{padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
-    .who{font-weight:700}
-    .text{opacity:.92}
-    .actions{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.06)}
-    .btn{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:600}
-    .btn.primary{background:rgba(96,165,255,.18)}
-    .btn.danger{background:rgba(255,96,96,.18)}
-    .tiny{font-size:12px;opacity:.85}
+  /* محتوى شريط النوتش (سطر علوي) */
+  .bar{
+    position:absolute; left:0; right:0;
+    top: calc(var(--safe-top));
+    height: var(--notch-h);
+    display:flex; align-items:center; gap:10px;
+    padding: 6px 12px; font-size:13px; font-weight:700;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(.9);opacity:.9}50%{transform:scale(1.15);opacity:1}}
+  .meter{display:flex;align-items:flex-end;gap:3px;height:14px}
+  .barv{width:3px;background:#8cf;border-radius:2px;opacity:.9}
+  @keyframes updown{from{height:6px}50%{height:14px}to{height:8px}}
+  .barv:nth-child(1){animation:updown 1s ease-in-out infinite .0s}
+  .barv:nth-child(2){animation:updown 1s ease-in-out infinite .15s}
+  .barv:nth-child(3){animation:updown 1s ease-in-out infinite .3s}
+  .barv:nth-child(4){animation:updown 1s ease-in-out infinite .45s}
+  .barv:nth-child(5){animation:updown 1s ease-in-out infinite .6s}
+  .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* حبة الحالة (صامت/عام) */
-    .pill{
-      position:fixed; z-index:7; left:50%; transform:translateX(-50%);
-      top: calc(var(--safe-top) + 8px + var(--island-h)/2 - 14px);
-      translate: 0 -60px; opacity:0; pointer-events:none;
-      background: var(--glass); border:1px solid var(--border); color:#fff;
-      padding:6px 10px; border-radius:999px; display:flex; gap:8px; align-items:center;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4);
-      transition: opacity .18s ease, translate .28s cubic-bezier(.2,.8,.2,1);
-    }
-    .pill.show{opacity:1; translate:0 0}
-    .bell{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08)}
-    .bell svg{width:12px;height:12px;display:block}
+  /* صينية المحتوى عند التوسعة */
+  .tray{
+    position:absolute; left:8px; right:8px;
+    top: calc(var(--safe-top) + var(--notch-h) + 6px);
+    display:grid; gap:8px; grid-template-columns: 1fr;
+    opacity:0; transform:translateY(-6px);
+    transition: opacity .18s ease, transform .24s ease;
+  }
+  .notch.expand .tray{opacity:1; transform:translateY(0)}
 
-    /* لوحة التحكم تحت */
-    .panel{
-      position:fixed; left:50%; bottom: calc(14px + var(--safe-bottom));
-      transform:translateX(-50%); display:flex; gap:10px; flex-wrap:wrap;
-      justify-content:center; z-index:8;
-    }
-    .panel .btn{font-size:14px}
+  .card{
+    background: rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px; padding:10px 12px; box-shadow:0 8px 20px rgba(0,0,0,.35);
+  }
+  .row{display:flex; gap:10px; align-items:flex-start}
+  .appicon{width:18px;height:18px;border-radius:4px;background:#1d1d22;display:grid;place-items:center;font-size:12px;flex:0 0 18px}
+  .wa{background:var(--ok)}
+  .who{font-weight:700}
+  .text{opacity:.92}
 
-    /* محتوى الجزيرة الافتراضي */
-    .title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .meter{display:flex;align-items:flex-end;gap:3px;height:14px}
-    .bar{width:3px;background:#8cf;border-radius:2px;opacity:.9}
-    @keyframes updown{from{height:6px}50%{height:14px}to{height:8px}}
-    .bar:nth-child(1){animation:updown 1s ease-in-out infinite .0s}
-    .bar:nth-child(2){animation:updown 1s ease-in-out infinite .15s}
-    .bar:nth-child(3){animation:updown 1s ease-in-out infinite .3s}
-    .bar:nth-child(4){animation:updown 1s ease-in-out infinite .45s}
-    .bar:nth-child(5){animation:updown 1s ease-in-out infinite .6s}
+  .pill{
+    display:inline-flex; gap:8px; align-items:center;
+    background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+    padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px;
+  }
+  .pill.ok{box-shadow: 0 8px 24px rgba(37,211,102,.25)}
+  .pill.warn{box-shadow: 0 8px 24px rgba(255,122,122,.25)}
 
-    /* تعليمات سريعة على الشاشة */
-    .hint{
-      position:fixed; z-index:9; left:50%; transform:translateX(-50%);
-      top: calc(var(--safe-top) + 56px);
-      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-      color:#fff; padding:8px 12px; border-radius:12px; font-size:12px;
-      backdrop-filter: blur(8px);
-    }
-  </style>
+  /* لوحة تحكم تحت */
+  .panel{
+    position:fixed; left:50%; bottom: calc(14px + var(--safe-bottom));
+    transform:translateX(-50%);
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center; z-index:9;
+  }
+  .btn{
+    padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06); color:#fff; font-weight:700; font-size:14px;
+  }
+
+  .hint{
+    position:fixed; left:50%; transform:translateX(-50%);
+    top: calc(var(--safe-top) + 52px); font-size:12px; opacity:.85;
+    background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    padding:6px 10px; border-radius:10px; backdrop-filter: blur(6px); z-index:10;
+  }
+</style>
 </head>
 <body>
   <div class="stage">
-    <div class="grid"></div>
+    <div class="bg"></div>
 
-    <div class="island" id="island">
-      <div class="row">
+    <!-- النوتش -->
+    <div class="notch" id="notch" title="اضغط للتوسيع/التصغير">
+      <div class="shape"></div>
+
+      <!-- شريط علوي داخل النوتش -->
+      <div class="bar">
         <div class="dot" aria-hidden="true"></div>
         <div class="meter" aria-hidden="true">
-          <div class="bar" style="height:8px"></div>
-          <div class="bar" style="height:12px"></div>
-          <div class="bar" style="height:9px"></div>
-          <div class="bar" style="height:14px"></div>
-          <div class="bar" style="height:7px"></div>
+          <div class="barv" style="height:8px"></div>
+          <div class="barv" style="height:12px"></div>
+          <div class="barv" style="height:9px"></div>
+          <div class="barv" style="height:14px"></div>
+          <div class="barv" style="height:7px"></div>
         </div>
-        <div class="title" id="title">محاكاة Dynamic Island — جاهز</div>
+        <div class="title" id="title">نوتش iPhone 13 Pro — جاهز</div>
       </div>
-    </div>
 
-    <!-- إشعار واتساب -->
-    <div class="card" id="waCard" role="dialog" aria-label="إشعار واتساب">
-      <div class="hdr">
-        <div class="appicon wa">🟢</div>
-        <div class="appname">WhatsApp</div>
-        <button class="close" data-close="#waCard">إغلاق</button>
-      </div>
-      <div class="msg">
-        <div>👤</div>
-        <div>
-          <div class="who" id="waFrom">صديقك</div>
-          <div class="text" id="waText">وينك؟ محتاجك ضروري الآن.</div>
+      <!-- صينية المحتوى (تظهر عند التوسعة) -->
+      <div class="tray" id="tray">
+        <!-- بطاقة واتساب -->
+        <div class="card" id="waCard">
+          <div class="row">
+            <div class="appicon wa">🟢</div>
+            <div>
+              <div class="who" id="waFrom">صديقك</div>
+              <div class="text" id="waText">وصلت؟ محتاجك الآن.</div>
+            </div>
+          </div>
+        </div>
+        <!-- حالة صامت/عام -->
+        <div class="card">
+          <div class="row">
+            <div class="pill ok" id="modePill">
+              <span id="bell">🔔</span>
+              <span id="modeText">النمط: عام</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="actions">
-        <button class="btn primary" onclick="alert('رد سريع (محاكاة)')">رد سريع</button>
-        <button class="btn" data-close="#waCard">تمييز كمقروء</button>
-        <button class="btn danger" data-close="#waCard">إغلاق</button>
-      </div>
-    </div>
-
-    <!-- حالة صامت/عام -->
-    <div class="pill" id="modePill">
-      <span class="bell" id="bellIcon">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/>
-        </svg>
-      </span>
-      <span id="modeText">النمط: عام</span>
     </div>
 
     <!-- لوحة التحكم -->
     <div class="panel">
+      <button class="btn" onclick="toggleExpand()">توسيع/تصغير النوتش</button>
       <button class="btn" onclick="triggerWA()">رسالة واتساب تجريبية</button>
-      <button class="btn" onclick="toggleMode()">تبديل: صامت/عام</button>
       <button class="btn" onclick="customWA()">رسالة مخصصة…</button>
+      <button class="btn" onclick="toggleMode()">تبديل: صامت/عام</button>
     </div>
 
-    <div class="hint">أضِف إلى الشاشة الرئيسية من Safari → Share → Add to Home Screen، ثم افتح من الأيقونة.</div>
+    <div class="hint">أضِف إلى الشاشة الرئيسية من Safari → Share → Add to Home Screen.</div>
   </div>
 
 <script>
-  // إغلاق البطاقات
-  document.querySelectorAll('.close').forEach(b=>{
-    b.addEventListener('click', e=>{
-      const sel = e.currentTarget.getAttribute('data-close');
-      if(sel) document.querySelector(sel).classList.remove('show');
-    });
+  const notch = document.getElementById('notch');
+  const tray  = document.getElementById('tray');
+
+  // توسيع/تصغير بالنقر
+  notch.addEventListener('click', (e)=>{
+    // نتجاهل النقر على الأزرار الداخلية لو توسعت
+    if(e.target.closest('.panel,.btn')) return;
+    toggleExpand();
   });
 
-  // إشعار واتساب (محاكاة)
-  function triggerWA(name="صديقك", text="وصلت؟ محتاجك الآن."){
-    document.getElementById('waFrom').textContent = name;
-    document.getElementById('waText').textContent = text;
-    const card = document.getElementById('waCard');
-    card.classList.add('show');
-    puffIsland();
-    clearTimeout(triggerWA._t);
-    triggerWA._t = setTimeout(()=>card.classList.remove('show'), 6000);
+  function toggleExpand(force){
+    const willExpand = force ?? !notch.classList.contains('expand');
+    notch.classList.toggle('expand', willExpand);
+    // عنوان ديناميكي بسيط
+    document.getElementById('title').textContent = willExpand
+      ? 'إشعارات تجريبية — اسحب للأعلى لإخفاء'
+      : 'نوتش iPhone 13 Pro — جاهز';
+    // نفخة بسيطة
+    puff();
   }
 
-  // إدخال مخصص
+  // إشعار واتساب (محاكاة)
+  function triggerWA(name="صديقك", text="وينك؟ محتاجك الآن."){
+    document.getElementById('waFrom').textContent = name;
+    document.getElementById('waText').textContent = text;
+    // افتح النوتش لو كان مغلق
+    if(!notch.classList.contains('expand')) toggleExpand(true);
+    // وميض للبطاقة
+    flash(document.getElementById('waCard'));
+  }
+
   function customWA(){
     const n = prompt("اسم المرسل:", "أحمد الواتس");
     if(n===null) return;
-    const t = prompt("نص الرسالة:", "وينك؟");
+    const t = prompt("نص الرسالة:", "تمام؟");
     if(t===null) return;
     triggerWA(n || "بدون اسم", t || "…");
   }
 
-  // تبديل صامت/عام (محاكاة)
-  let isSilent = false;
+  // تبديل صامت/عام
+  let silent = false;
   function toggleMode(){
-    isSilent = !isSilent;
+    silent = !silent;
     const pill = document.getElementById('modePill');
-    const txt = document.getElementById('modeText');
-    const bell = document.getElementById('bellIcon');
-    txt.textContent = "النمط: " + (isSilent ? "صامت" : "عام");
-    bell.innerHTML = isSilent
-      ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/></svg>`
-      : `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v2h16v-2l-2-2Z"/></svg>`;
-    pill.style.boxShadow = isSilent
-      ? "0 12px 36px rgba(255,96,96,.25)"
-      : "0 12px 36px rgba(96,165,255,.25)";
-    pill.classList.add('show');
-    puffIsland(isSilent ? 'danger' : 'normal');
-    clearTimeout(toggleMode._t);
-    toggleMode._t = setTimeout(()=>pill.classList.remove('show'), 2500);
+    const txt  = document.getElementById('modeText');
+    const bell = document.getElementById('bell');
+    txt.textContent = "النمط: " + (silent ? "صامت" : "عام");
+    bell.textContent = silent ? "🔕" : "🔔";
+    pill.classList.toggle('ok', !silent);
+    pill.classList.toggle('warn', silent);
+    if(!notch.classList.contains('expand')) toggleExpand(true);
+    flash(pill.closest('.card'));
   }
 
-  // نفخة مرنة للجزيرة
-  function puffIsland(mode='normal'){
-    const el = document.getElementById('island');
+  // نفخة للنوتش
+  function puff(){
+    const shape = notch.querySelector('.shape');
+    shape.animate(
+      [
+        { transform: 'translateX(-50%) scaleY(1)' },
+        { transform: 'translateX(-50%) scaleY(1.05)' },
+        { transform: 'translateX(-50%) scaleY(1)' }
+      ],
+      { duration: 260, easing: 'cubic-bezier(.2,.9,.2,1)' }
+    );
+  }
+
+  // وميض لأي عنصر بطاقة
+  function flash(el){
     el.animate(
       [
-        { transform: 'translateX(-50%) scale(1)' },
-        { transform: 'translateX(-50%) scale(1.06)' },
-        { transform: 'translateX(-50%) scale(1)' }
+        { boxShadow:'0 8px 20px rgba(0,0,0,.35)' },
+        { boxShadow:'0 8px 28px rgba(96,165,255,.45)' },
+        { boxShadow:'0 8px 20px rgba(0,0,0,.35)' }
       ],
-      { duration: 320, easing: 'cubic-bezier(.2,.9,.2,1)' }
+      { duration: 420, easing: 'ease-in-out' }
     );
-    el.style.boxShadow = mode==='danger'
-      ? "0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(255,96,96,.28)"
-      : "0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.22)";
-    clearTimeout(puffIsland._t);
-    puffIsland._t = setTimeout(()=>{
-      el.style.boxShadow = "0 12px 34px rgba(0,0,0,.45), 0 0 24px rgba(96,165,255,.18)";
-    }, 500);
   }
+
+  // سحب للأعلى لإغلاق (إيماءة بسيطة)
+  let sy=null;
+  notch.addEventListener('touchstart', e=>{ sy = e.touches[0].clientY; }, {passive:true});
+  notch.addEventListener('touchmove', e=>{
+    if(sy==null) return;
+    const dy = e.touches[0].clientY - sy;
+    if(dy < -40){ toggleExpand(false); sy=null; }
+  }, {passive:true});
+  notch.addEventListener('touchend', ()=>{ sy=null; }, {passive:true});
 
   // تحسين اللمس على iOS
   document.addEventListener('touchstart', ()=>{}, {passive:true});
